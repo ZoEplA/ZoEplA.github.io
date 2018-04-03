@@ -8,7 +8,7 @@ categories: jekyll update
 #### reversing50
 直接IDA打开查看main函数，就是把十六进制转为char形式，flag就出来了
 
-![image](images/posts/Pragyan CTF/1520141353979.png)
+![image](/images/posts/Pragyan CTF/1520141353979.png)
 
 #### pwn200
 
