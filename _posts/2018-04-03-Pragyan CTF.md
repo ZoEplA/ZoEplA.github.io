@@ -42,11 +42,11 @@ categories: jekyll update
     <img src="/images/posts/Pragyan CTF/1520141589934.png" >  
 </div>
 =======
-![image](images/posts/Pragyan CTF/1520141419663.png)
+![image](https://zoepla.github.io/images/posts/Pragyan%20CTF/1520141419663.png)
 
 看到密码；运行一下
 
-![image](images/posts/Pragyan CTF/1520141459758.png)
+![image](../images/posts/Pragyan CTF/1520141459758.png)
 
 看到有flag，输入看一下，但是没有权限看，回去IDA看下函数
 
