@@ -22,7 +22,7 @@ title: 关于我
 我会每天更新我的学习进展，持续差不多两个月的pwn学习，希望能踏踏实实地好好学pwn，坚持！！！
 
 <p> 
-[战队github](https://github.com/ZoEplA/Team233):https://github.com/ZoEplA/Team233
+战队github:https://github.com/ZoEplA/Team233
 <p> 
 
 
