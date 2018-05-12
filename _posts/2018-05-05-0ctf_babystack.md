@@ -1,3 +1,9 @@
+---
+layout: post
+title: "0ctf/tctf babystack"
+date: 2018-05-07
+categories: jekyll update
+---
 ### 0ctf/tctf babystack
 
 + [_dl_runtime_resolve源码](https://code.woboq.org/userspace/glibc/sysdeps/i386/dl-trampoline.S.html)
