@@ -1,9 +1,15 @@
-### level6  cookie
+---
+layout: post
+title: "cookie爆破"
+date: 2018-05-23
+categories: jekyll update
+---
+### level6_cookie
 
 
 这是一个简单的**socket服务器栈溢出**的题目
 ##### 溢出漏洞点
-![Alt text](./1530851457324.png)
+<img src="/images/posts/keen/1530851457324.png" >
 
 **特点：fork子程序，从同一片内存申请，cookie值一样，可以爆破**
 
