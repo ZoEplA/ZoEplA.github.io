@@ -32,7 +32,7 @@ categories: jekyll update
 + https://www.usna.edu/Users/cs/aviv/classes/ic221/s16/lec/21/lec.html
 + https://blog.csdn.net/silent123go/article/details/71108501
 
-![Alt text](./764102387061821104.jpg)
+<img src="/images/posts/keen/level7/764102387061821104.png" >
 
 
 
