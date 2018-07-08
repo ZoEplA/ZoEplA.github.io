@@ -16,7 +16,7 @@ categories: jekyll update
 
 ### 与level6不同之处
 + 开了PIE，需要泄露程序地址，但是又没有可以泄露地址的特殊漏洞，开了PIE无法用level6的方法
-+ 这个多push了一个ebx进栈，刚好在canary之后，可以爆破出这个就是程序的基地址加上0x3000(见下图)；因此我们的目标转变为爆破这个地址，因为后面的地址取值可能会影响程序运行，因此我把canary到ret地址的三个地址都爆破了一遍，因为漏洞所在子进程是fork出来的(子进程的实现可以是fork或者)，因此他的内存地址是同一块内存，所以只需要爆破一次即可(本地调试的时候注意如果进程崩了需要重新爆破一次；远程则不需要)。
++ 这个多push了一个ebx(EBX 是"基地址"(base)寄存器, 在内存寻址时存放基地址。)进栈，刚好在canary之后，可以爆破出这个就是程序的基地址加上0x3000(见下图)；因此我们的目标转变为爆破这个地址，因为后面的地址取值可能会影响程序运行，因此我把canary到ret地址的三个地址都爆破了一遍，因为漏洞所在子进程是fork出来的(子进程的实现可以是fork或者)，因此他的内存地址是同一块内存，所以只需要爆破一次即可(本地调试的时候注意如果进程崩了需要重新爆破一次；远程则不需要)。
 
 <img src="/images/posts/keen/level7/1530959763610.png" >
 
@@ -31,7 +31,7 @@ categories: jekyll update
 参考文章
 + https://www.usna.edu/Users/cs/aviv/classes/ic221/s16/lec/21/lec.html
 + https://blog.csdn.net/silent123go/article/details/71108501
-
++ http://man7.org/linux/man-pages/man2/dup.2.html
 <img src="/images/posts/keen/level7/764102387061821104.jpg" >
 
 
