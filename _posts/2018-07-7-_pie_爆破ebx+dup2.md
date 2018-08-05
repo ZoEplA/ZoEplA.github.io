@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "pie_爆破ebx+bup2"
+title: "pie_爆破ebx+dup2"
 date: 2018-07-7
 categories: jekyll update
 ---
