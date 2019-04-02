@@ -343,6 +343,8 @@ gdb-peda$ x /30xg 0x00007f1c95e9f620
 + 关闭ASLR	`echo 0 > /proc/sys/kernel/randomize_va_space`
 + 两个断点`bb 0x141D`  ADD  &  ` bb 0x1521`  delete
 
+然后我们来看一下操作：
+
 ```
 add_task(0, 1, 'test', '1234', 8, 'AAAA')
 add_task(1, 1, 'test', '1234', 8, 'BBBB')
