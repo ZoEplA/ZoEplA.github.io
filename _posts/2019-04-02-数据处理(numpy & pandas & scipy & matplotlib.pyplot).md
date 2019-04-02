@@ -41,7 +41,7 @@ plt.imshow(mandelbrot(400, 400))
 plt.show()
 ```
 
-<img src="/images/posts/keen/datahandle/1547988581316.png" >
+<img src="/images/posts/datahandle/1547988581316.png" >
 
 ### 柱形图 hist
 
@@ -100,16 +100,16 @@ print(df2)
 
 ### 数据清洗
 
-<img src="/images/posts/keen/datahandle/1548303995075.png" >
+<img src="/images/posts/datahandle/1548303995075.png" >
 
 知乎专栏：https://zhuanlan.zhihu.com/dataclean
 
 
-<img src="/images/posts/keen/datahandle/1548312577563.png" >
+<img src="/images/posts/datahandle/1548312577563.png" >
 
 参考网址：https://zhuanlan.zhihu.com/p/20571505
 
-<img src="/images/posts/keen/datahandle/1548312712832.png" >
+<img src="/images/posts/datahandle/1548312712832.png" >
 
 
 ### pandas 小知识点学习参考
@@ -290,7 +290,7 @@ columns=["col1", "col2", "col3", "col4"])
 
 下图代表在DataFrame当中axis为0和1时分别代表的含义: 
 
-<img src="/images/posts/keen/datahandle/1548252811170.png" >
+<img src="/images/posts/datahandle/1548252811170.png" >
 
 axis参数作用方向图示。另外，记住，Pandas保持了Numpy对关键字axis的用法，用法在Numpy库的词汇表当中有过解释：轴用来为超过一维的数组定义的属性，二维数据拥有两个轴：第0轴沿着行的垂直往下，第1轴沿着列的方向水平延伸。 
 所以问题当中第一个列子 df.mean(axis=1)代表沿着列水平方向计算均值，而第二个列子df.drop(name, axis=1) 代表将name对应的列标签（们）沿着水平的方向依次删掉。即df.mean(axis=1)表示一行一行的计算均值，df.drop(name, axis=1)表示一行一行的将name列删掉。还可以这样理解，axis等于那个维度代表操作在哪个维度上进行，操作后该维度消失(变成1)。如df.mean(axis=1)，axis=1表示均值操作在列上进行(跨列操作)，即按照行相加求均值，操作后变成一列。axis指定哪个维度表示跨哪个维度进行操作。
