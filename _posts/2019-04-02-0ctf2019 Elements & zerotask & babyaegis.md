@@ -713,6 +713,8 @@ ReportAndCrash(Addr);
 + 非0至少可以理解为不可写的地方。
 ### 漏洞分析
 这个题目主要难度在于加了asan检查，程序在update那里存在offbyone，但是普通的堆块内容跟结构体是相差很远的，所以按理来说并没有什么用，但是问题是当你分配数据大小为0x10的时候会发现数据段跟结构体是相邻的，这样一来就可以修改结构体了，然后`secret(0x0c047fff8004)`主要是为了绕过asan对`0x602000000020`这个地址的检查，以便后面可以修改覆盖这个地方的值。然后最重要的就是改成什么了，这个主要看asan源码可以看到关于这个结构体的信息：
+
+
 ```
 // The memory chunk allocated from the underlying allocator looks like this:
 // L L L L L L H H U U U U U U R R
