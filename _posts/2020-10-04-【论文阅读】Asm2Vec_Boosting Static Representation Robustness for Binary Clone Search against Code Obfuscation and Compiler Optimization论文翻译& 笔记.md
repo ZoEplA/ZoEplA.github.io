@@ -1,11 +1,16 @@
 ---
 layout: post
-title: "Asm2Vec: Boosting Static Representation Robustness for Binary Clone Search against Code Obfuscation and Compiler Optimization论文翻译& 笔记"
+title: "【论文阅读】Asm2Vec: Boosting Static Representation Robustness for Binary Clone Search against Code Obfuscation and Compiler Optimization论文翻译& 笔记"
 date: 2020-10-04
 categories: jekyll update
 ---
 
-## Asm2Vec: Boosting Static Representation Robustness for Binary Clone Search against Code Obfuscation and Compiler Optimization论文翻译& 笔记
+## 【论文阅读】Asm2Vec: Boosting Static Representation Robustness for Binary Clone Search against Code Obfuscation and Compiler Optimization论文翻译& 笔记
+
+### Asm2Vec的pdf版本以及LEMNA论文阅读笔记
+
++ [Asm2Vec: Boosting Static Representation Robustness for Binary Clone Search against Code Obfuscation and Compiler Optimization论文翻译& 笔记](https://github.com/ZoEplA/ZoEplA.github.io/blob/master/share_file/Asm2Vec_Boosting%20Static%20Representation%20Robustness%20for%20Binary%20Clone%20Search%20against%20Code%20Obfuscation%20and%20Compiler%20Optimization%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%26%20%E7%AC%94%E8%AE%B0.pdf)
++ [LEMNA_ Explaining Deep Learning based Security Applications 论文翻译&笔记](https://github.com/ZoEplA/ZoEplA.github.io/blob/master/share_file/LEMNA_%20Explaining%20Deep%20Learning%20based%20Security%20Applications%20%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91%26%E7%AC%94%E8%AE%B0.pdf)
 
 ### Abstract
 
