@@ -5,7 +5,6 @@ date: 2020-10-04
 categories: jekyll update
 ---
 
-## 【论文阅读】Asm2Vec: Boosting Static Representation Robustness for Binary Clone Search against Code Obfuscation and Compiler Optimization论文翻译& 笔记
 
 ### Asm2Vec的pdf版本以及LEMNA论文阅读笔记
 
